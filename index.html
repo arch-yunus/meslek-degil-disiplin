@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disiplin Seçimi Rehberi | Geleceğin Meslek Karar Portalı</title>
+    <meta name="description" content="Yapay zeka çağında üniversite tercihi yaparken meslek odaklı değil, disiplin odaklı düşünerek geleceğinizi güvence altına alın. İnteraktif araçlar, T-Tipi Kariyer planlayıcı ve Bölüm Analiz aracı.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background Glow Elements -->
+    <div class="glow-bg">
+        <div class="glow-sphere glow-1"></div>
+        <div class="glow-sphere glow-2"></div>
+    </div>
+
+    <!-- Header / Navigation -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">Disiplin<span>Rehberi</span></span>
+            </div>
+            <nav>
+                <a href="#katalog" class="nav-link active" data-target="katalog-sec">Disiplin Kataloğu</a>
+                <a href="#degerlendirme" class="nav-link" data-target="degerlendirme-sec">Bölüm Karar Quiz'i</a>
+                <a href="#t-builder" class="nav-link" data-target="t-builder-sec">T-Tipi Kariyer Builder</a>
+                <a href="#checklist" class="nav-link" data-target="checklist-sec">Tercih Listem</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-container">
+            <div class="badge-container">
+                <span class="hero-badge">🚀 Yapay Zeka Çağına Uyumlu Tercih Rehberi</span>
+            </div>
+            <h1>Meslek Değil, <br><span class="gradient-text">Disiplin Seçin!</span></h1>
+            <p class="hero-desc">
+                Teknolojinin her şeyi birkaç yılda bir yıktığı bir çağda yaşıyoruz. Dar uzmanlıklar yok olurken, temel zihinsel araç setleri ve düşünme disiplinleri ayakta kalıyor. Kendi geleceğinizi bir "işletim sistemi" gibi inşa edin.
+            </p>
+            <div class="hero-actions">
+                <a href="#degerlendirme" class="btn btn-primary btn-lg" onclick="showSection('degerlendirme-sec')">Bölümünü Test Et</a>
+                <a href="#katalog" class="btn btn-secondary btn-lg" onclick="showSection('katalog-sec')">Kataloğu Keşfet</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="container">
+        <!-- 1. DİSİPLİN KATALOĞU SECTON -->
+        <section id="katalog-sec" class="app-section active">
+            <div class="section-header">
+                <h2>📚 Temel Disiplinler Kataloğu</h2>
+                <p>Geleceğin dünyasında her sektöre adapte olabilen, zamansız düşünme sistemleri.</p>
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all">Tümü</button>
+                    <button class="filter-btn" data-filter="sayisal">Formel & Sayısal</button>
+                    <button class="filter-btn" data-filter="sosyal">Sosyal & Beşeri</button>
+                    <button class="filter-btn" data-filter="doga">Doğa & Temel Bilimler</button>
+                </div>
+            </div>
+
+            <div class="disciplines-grid" id="disciplines-container">
+                <!-- Cards will be dynamically rendered via JS -->
+            </div>
+        </section>
+
+        <!-- 2. BÖLÜM DEĞERLENDİRME QUIZ SECTION -->
+        <section id="degerlendirme-sec" class="app-section">
+            <div class="section-header">
+                <h2>🔬 Bölüm Karar Quiz'i</h2>
+                <p>Düşündüğünüz bölümün gelecekte ne kadar dayanıklı, esnek ve yapay zekaya karşı dirençli olduğunu ölçün.</p>
+            </div>
+
+            <div class="card quiz-card">
+                <!-- Quiz Landing -->
+                <div id="quiz-landing" class="quiz-step active">
+                    <div class="quiz-landing-content">
+                        <span class="quiz-large-icon">📊</span>
+                        <h3>Bölümünüzü Test Etmeye Hazır mısınız?</h3>
+                        <p>Düşündüğünüz üniversite bölümünün veya mesleğin adını girerek 6 soruluk analizi başlatın.</p>
+                        
+                        <div class="form-group">
+                            <label for="dept-input">Düşündüğünüz Bölümün / Mesleğin Adı:</label>
+                            <input type="text" id="dept-input" placeholder="Örn: Endüstri Mühendisliği, Hukuk, Grafik Tasarım..." autocomplete="off">
+                            <span class="error-msg" id="dept-error">Lütfen bir bölüm adı girin.</span>
+                        </div>
+
+                        <button class="btn btn-primary btn-lg btn-block" id="start-quiz-btn">Analizi Başlat</button>
+                    </div>
+                </div>
+
+                <!-- Quiz Questions (Dynamic) -->
+                <div id="quiz-question-container" class="quiz-step">
+                    <div class="quiz-progress-bar">
+                        <div class="quiz-progress" id="quiz-progress-indicator" style="width: 16.6%;"></div>
+                    </div>
+                    <div class="quiz-meta">
+                        <span id="question-counter">Soru 1 / 6</span>
+                    </div>
+                    
+                    <h3 id="question-text">Soru metni buraya gelecek...</h3>
+                    
+                    <div class="options-list" id="options-container">
+                        <!-- Options dynamically loaded here -->
+                    </div>
+
+                    <div class="quiz-nav">
+                        <button class="btn btn-secondary" id="quiz-prev-btn" style="visibility: hidden;">Geri</button>
+                    </div>
+                </div>
+
+                <!-- Quiz Results -->
+                <div id="quiz-result" class="quiz-step">
+                    <div class="result-header">
+                        <span class="result-badge" id="result-status-badge">Mükemmel Temel</span>
+                        <h3 id="result-title">Yapay Zeka Analiz Raporu: [Bölüm]</h3>
+                        <div class="score-container">
+                            <div class="score-ring">
+                                <span class="score-value" id="result-score">85</span>
+                                <span class="score-label">/100</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-breakdown">
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">
+                                <span>Sürdürülebilirlik & Ömür</span>
+                                <span id="val-sustain">80%</span>
+                            </div>
+                            <div class="progress-bar"><div class="progress" id="bar-sustain" style="width: 80%"></div></div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">
+                                <span>Kariyer Esnekliği (Taşınabilirlik)</span>
+                                <span id="val-flex">90%</span>
+                            </div>
+                            <div class="progress-bar"><div class="progress" id="bar-flex" style="width: 90%"></div></div>
+                        </div>
+                        <div class="breakdown-item">
+                            <div class="breakdown-label">
+                                <span>Yapay Zeka Bağışıklığı</span>
+                                <span id="val-immunity">85%</span>
+                            </div>
+                            <div class="progress-bar"><div class="progress" id="bar-immunity" style="width: 85%"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="result-report-card">
+                        <h4>📋 Genel Değerlendirme & Tavsiye</h4>
+                        <p id="result-advice-text">Bölüme ait özel tavsiye metni buraya yüklenecektir.</p>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button class="btn btn-primary" id="restart-quiz-btn">Yeni Analiz Yap</button>
+                        <button class="btn btn-secondary" id="transfer-to-builder-btn">Bu Bölümü T-Builder'a Aktar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. T-TİPİ KARİYER BUILDER SECTION -->
+        <section id="t-builder-sec" class="app-section">
+            <div class="section-header">
+                <h2>🧠 T-Tipi Kariyer Builder</h2>
+                <p>Merkeze güçlü bir disiplin (dikey çubuk) ve etrafına sektörel pratik yetenekler (yatay çubuk) ekleyerek kendi geleceğini kurgula.</p>
+            </div>
+
+            <div class="t-builder-grid">
+                <div class="card t-builder-controls">
+                    <h3>🛠️ Modelini Tasarla</h3>
+                    
+                    <div class="form-group">
+                        <label for="t-core-select">1. Temel Disiplininiz (Dikey Derinlik):</label>
+                        <select id="t-core-select">
+                            <option value="Matematik ve İstatistik">Matematik ve İstatistik</option>
+                            <option value="Ekonomi ve İktisat">Ekonomi ve İktisat</option>
+                            <option value="Psikoloji">Psikoloji</option>
+                            <option value="Felsefe">Felsefe</option>
+                            <option value="Temel Bilimler (Fizik/Biyoloji)">Temel Bilimler (Fizik/Biyoloji)</option>
+                            <option value="Bilgisayar Bilimleri">Bilgisayar Bilimleri</option>
+                            <option value="Sosyoloji ve Antropoloji">Sosyoloji ve Antropoloji</option>
+                            <option value="Dilbilim">Dilbilim</option>
+                            <option value="Hukuk Kuramı ve Felsefesi">Hukuk Kuramı ve Felsefesi</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>2. Yatay Becerileriniz (Genişlik - En Fazla 5 Adet Seçin):</label>
+                        <div class="skills-checkbox-grid" id="skills-selector-container">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="custom-skill-input">Kendi Yatay Becerini Ekle:</label>
+                        <div class="input-inline">
+                            <input type="text" id="custom-skill-input" placeholder="Örn: Video Kurgu, Çince, SQL...">
+                            <button class="btn btn-secondary" id="add-custom-skill-btn">Ekle</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card t-builder-preview">
+                    <h3>👁️ T-Profil Görselleştirme</h3>
+                    <div class="t-model-wrapper">
+                        <!-- T Model Graphical representation using CSS grids/absolute positions -->
+                        <div class="t-horizontal-bar" id="t-preview-horizontal">
+                            <div class="t-bar-title">YATAY BECERİLER (GENİŞLİK)</div>
+                            <div class="t-horizontal-skills" id="t-preview-skills-container">
+                                <!-- Skills tags -->
+                            </div>
+                        </div>
+                        <div class="t-vertical-stem" id="t-preview-vertical">
+                            <div class="t-stem-content">
+                                <span class="t-stem-icon">🔬</span>
+                                <h4 id="t-preview-core-title">Matematik ve İstatistik</h4>
+                                <p>TEMEL DİSİPLİN (DİKEY DERİNLİK)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="t-actions">
+                        <button class="btn btn-primary" id="export-profile-btn">Kariyer Planını Kopyala</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. TERCİH LİSTEM SECTION -->
+        <section id="checklist-sec" class="app-section">
+            <div class="section-header">
+                <h2>✅ Tercih Listem Karar Matrisi</h2>
+                <p>Tercih listendeki bölümleri 3 altın kurala göre puanlayıp sırala. Listen yerel tarayıcına otomatik kaydedilir.</p>
+            </div>
+
+            <div class="card">
+                <div class="checklist-adder">
+                    <input type="text" id="checklist-item-input" placeholder="Örn: 1. ODTÜ - Matematik">
+                    <button class="btn btn-primary" id="add-checklist-item-btn">Listeye Ekle</button>
+                </div>
+
+                <div class="checklist-table-wrapper">
+                    <table class="checklist-table">
+                        <thead>
+                            <tr>
+                                <th># Tercih Adı</th>
+                                <th class="center">Sürdürülebilirlik</th>
+                                <th class="center">Esneklik</th>
+                                <th class="center">Tutku/İstisna</th>
+                                <th class="center">Toplam Skor</th>
+                                <th class="center">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="checklist-items-container">
+                            <!-- Dynamically loaded -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="checklist-empty-state" id="checklist-empty">
+                    <span>📝 Listede henüz tercih bulunmuyor. Yukarıdan ilk tercihinizi ekleyin.</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Detailed Discipline Drawer/Modal -->
+    <div class="modal-backdrop" id="discipline-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Disiplin Detayı</h3>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-meta-row">
+                    <span class="modal-category-badge" id="modal-category">Kategori</span>
+                    <div class="modal-ai-safety">
+                        <span>Yapay Zeka Bağışıklığı:</span>
+                        <div class="mini-progress-bar">
+                            <div class="progress" id="modal-ai-progress" style="width: 70%;"></div>
+                        </div>
+                        <span id="modal-ai-score">70%</span>
+                    </div>
+                </div>
+                
+                <div class="modal-info-section">
+                    <h4>🔬 Neden Temel Bir Disiplindir?</h4>
+                    <p id="modal-why">Açıklama...</p>
+                </div>
+
+                <div class="modal-info-section">
+                    <h4>🛣️ Geleceğin Adaptasyon Senaryoları</h4>
+                    <ul class="adaptation-list" id="modal-adaptation-list">
+                        <!-- List items -->
+                    </ul>
+                </div>
+
+                <div class="modal-info-section">
+                    <h4>🛠️ Kazandıracağı Temel Araç Seti (Toolkit)</h4>
+                    <div class="skills-tags" id="modal-toolkit-tags">
+                        <!-- Tags -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast-notification">Kopyalandı!</div>
+
+    <footer>
+        <div class="container footer-content">
+            <p>© 2026 Meslek Değil Disiplin. Tüm hakları saklıdır. Açık kaynak kodlu eğitim projesidir.</p>
+            <p>Prof. Dr. Selçuk Şirin'in değerli fikirlerinden ilham alınarak tasarlanmıştır.</p>
+        </div>
+    </footer>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
