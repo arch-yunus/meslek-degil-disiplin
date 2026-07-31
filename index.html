@@ -165,6 +165,20 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Quiz History Section (New Card) -->
+            <div class="card quiz-history-card" id="quiz-history-card" style="margin-top: 40px; display: none;">
+                <div class="history-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+                    <h3 style="font-size: 1.4rem; font-weight: 700;">📊 Analiz Geçmişi ve Karşılaştırma</h3>
+                    <button class="btn btn-secondary btn-sm" id="clear-history-btn" style="padding: 8px 16px; font-size: 0.85rem;">Geçmişi Temizle</button>
+                </div>
+                <div class="history-grid" id="history-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                    <!-- History cards loaded here -->
+                </div>
+                <div class="history-actions" id="history-compare-action" style="display: none; margin-top: 24px; text-align: center;">
+                    <button class="btn btn-primary" id="compare-selected-btn">Seçili Bölümleri Karşılaştır</button>
+                </div>
+            </div>
         </section>
 
         <!-- 3. T-TİPİ KARİYER BUILDER SECTION -->
@@ -190,6 +204,8 @@
                             <option value="Sosyoloji ve Antropoloji">Sosyoloji ve Antropoloji</option>
                             <option value="Dilbilim">Dilbilim</option>
                             <option value="Hukuk Kuramı ve Felsefesi">Hukuk Kuramı ve Felsefesi</option>
+                            <option value="Sanat & Tasarım Kuramı (Estetik ve Görsel İletişim)">Sanat & Tasarım Kuramı</option>
+                            <option value="Tarih ve Siyaset Bilimi">Tarih ve Siyaset Bilimi</option>
                         </select>
                     </div>
 
@@ -230,6 +246,16 @@
                     <div class="t-actions">
                         <button class="btn btn-primary" id="export-profile-btn">Kariyer Planını Kopyala</button>
                     </div>
+
+                    <!-- Synergy Analyzer Panel -->
+                    <div class="t-synergy-panel" id="t-synergy-panel" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+                        <h4 style="font-size: 1.1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            <span>⚡</span> Kariyer Sinerji Analizi
+                        </h4>
+                        <div class="t-synergy-content" id="t-synergy-content">
+                            <!-- Dynamically loaded synergy roles -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -251,6 +277,7 @@
                     <table class="checklist-table">
                         <thead>
                             <tr>
+                                <th class="center" style="width: 80px;">Sıra</th>
                                 <th># Tercih Adı</th>
                                 <th class="center">Sürdürülebilirlik</th>
                                 <th class="center">Esneklik</th>
@@ -267,6 +294,39 @@
                 
                 <div class="checklist-empty-state" id="checklist-empty">
                     <span>📝 Listede henüz tercih bulunmuyor. Yukarıdan ilk tercihinizi ekleyin.</span>
+                </div>
+
+                <!-- Smart Assistant Panel -->
+                <div class="checklist-analysis-panel" id="checklist-analysis-panel" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px; display: none;">
+                    <h3 style="font-size: 1.3rem; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                        <span>🤖</span> Tercih Listesi Akıllı Değerlendirmesi
+                    </h3>
+                    <div class="analysis-grid">
+                        <div class="analysis-stats">
+                            <div class="stat-card">
+                                <span class="stat-num" id="stat-avg-score">0%</span>
+                                <span class="stat-label">Ortalama Skor</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-num" id="stat-avg-sustain">0%</span>
+                                <span class="stat-label">Sürdürülebilirlik</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-num" id="stat-avg-flex">0%</span>
+                                <span class="stat-label">Esneklik</span>
+                            </div>
+                        </div>
+                        <div class="analysis-feedback">
+                            <h4>📋 Asistan Analiz Raporu</h4>
+                            <p id="analysis-feedback-text">Listenizdeki tercihlere göre detaylı tavsiyeler burada görünecektir.</p>
+                            <div class="recommended-skills-section" style="margin-top: 20px;">
+                                <h5>💡 Tavsiye Edilen Yatay Beceriler:</h5>
+                                <div class="skills-tags" id="analysis-recommended-skills" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <!-- Recommended skills tags -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -309,6 +369,19 @@
                         <!-- Tags -->
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Dashboard Modal/Overlay -->
+    <div class="modal-backdrop" id="comparison-modal">
+        <div class="modal-card" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 id="comparison-modal-title">📊 Bölüm Karşılaştırma Paneli</h3>
+                <button class="modal-close-btn" id="comparison-modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="comparison-modal-body" style="padding: 32px; overflow-y: auto;">
+                <!-- Dynamic comparison content -->
             </div>
         </div>
     </div>

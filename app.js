@@ -134,6 +134,36 @@ const disciplinesData = [
             "<strong>Yarın:</strong> Akıllı Kontrat Denetçisi veya Yapay Zeka Regülasyon Politikacısı olabilirsiniz."
         ],
         toolkit: ["Mantıksal Analiz", "Etik Kurallar", "Sözleşme Tasarımı", "Uyuşmazlık Çözümü", "Regülasyon"]
+    },
+    {
+        id: "sanattasarim",
+        title: "Sanat & Tasarım Kuramı (Estetik ve Görsel İletişim)",
+        category: "sosyal",
+        categoryText: "Sosyal & Beşeri",
+        icon: "🎨",
+        aiSafety: 90,
+        why: "Yapay zeka araçları otomatik olarak görsel üretebilir, ancak insan-merkezli tasarım, estetik algısı, mekansal ve görsel sembolizm ve duygusal hikayecilik her çağda insanların zihnini etkileyen zamansız bir disiplindir.",
+        adaptation: [
+            "<strong>Dün:</strong> Klasik grafiker, desinatör veya ressam olurdunuz.",
+            "<strong>Bugün:</strong> Kullanıcı Deneyimi (UX) Tasarımcısı veya Kreatif Direktör olursunuz.",
+            "<strong>Yarın:</strong> Yapay Zeka Sanat Kuratörü veya Sanal Evren (Metaverse) Mekan Mimarı olabilirsiniz."
+        ],
+        toolkit: ["Estetik Kuramı", "Görsel Hikayecilik", "Tasarım Odaklı Düşünme (Design Thinking)", "Kullanıcı Deneyimi (UX)", "İletişim Semiyotiği"]
+    },
+    {
+        id: "tarihpolitika",
+        title: "Tarih ve Siyaset Bilimi",
+        category: "sosyal",
+        categoryText: "Sosyal & Beşeri",
+        icon: "📜",
+        aiSafety: 85,
+        why: "Tarih döngüler halinde ilerler ve siyaset bilimleri güç ve kaynak dağılımının kurallarını belirler. İnsan sistemlerinin nasıl kurulduğunu, çöktüğünü ve dönüştüğünü anlamak, en büyük makro stratejik araçtır.",
+        adaptation: [
+            "<strong>Dün:</strong> Arşivci, tarih öğretmeni veya kamu memuru olurdunuz.",
+            "<strong>Bugün:</strong> Kamu Politikaları Danışmanı veya Stratejik Jeopolitik Risk Analisti olursunuz.",
+            "<strong>Yarın:</strong> Blockchain/DAO Yönetişim Mimarı veya Yapay Zeka Regülasyon ve Toplum Stratejisti olabilirsiniz."
+        ],
+        toolkit: ["Sistemik Analiz", "Tarihsel Döngüler", "Siyaset Kuramı", "Jeopolitik Strateji", "Kamu Politikaları"]
     }
 ];
 
@@ -215,12 +245,32 @@ let customHorizontalSkills = [...horizontalSkills];
 let selectedBuilderCore = "Matematik ve İstatistik";
 let selectedBuilderSkills = ["Python ile Veri Analizi", "İleri Düzey İngilizce"];
 let checklistItems = [];
+let quizHistory = [];
 
 // DOM ELEMENTS
 const navLinks = document.querySelectorAll(".nav-link");
 const sections = document.querySelectorAll(".app-section");
 const disciplinesContainer = document.getElementById("disciplines-container");
 const filterBtns = document.querySelectorAll(".filter-btn");
+
+// NEW DOM ELEMENTS FOR EXTENDED FEATURES
+const quizHistoryCard = document.getElementById("quiz-history-card");
+const historyGrid = document.getElementById("history-grid");
+const clearHistoryBtn = document.getElementById("clear-history-btn");
+const historyCompareAction = document.getElementById("history-compare-action");
+const compareSelectedBtn = document.getElementById("compare-selected-btn");
+const comparisonModal = document.getElementById("comparison-modal");
+const comparisonModalCloseBtn = document.getElementById("comparison-modal-close-btn");
+const comparisonModalBody = document.getElementById("comparison-modal-body");
+
+const tSynergyContent = document.getElementById("t-synergy-content");
+
+const checklistAnalysisPanel = document.getElementById("checklist-analysis-panel");
+const statAvgScore = document.getElementById("stat-avg-score");
+const statAvgSustain = document.getElementById("stat-avg-sustain");
+const statAvgFlex = document.getElementById("stat-avg-flex");
+const analysisFeedbackText = document.getElementById("analysis-feedback-text");
+const analysisRecommendedSkills = document.getElementById("analysis-recommended-skills");
 
 // MODAL ELEMENTS
 const modal = document.getElementById("discipline-modal");
@@ -288,6 +338,7 @@ function initApp() {
     initQuiz();
     initTBuilder();
     initChecklist();
+    initQuizHistory();
 }
 
 // --- NAVIGATION ---
@@ -565,6 +616,9 @@ function calculateAndShowResult() {
     resultStatusBadge.textContent = status;
     resultAdviceText.innerHTML = advice;
 
+    // Save to history
+    saveQuizToHistory(targetDeptName, aggregateScore, sustainPercent, flexPercent, aiPercent);
+
     // View switch
     quizQuestionContainer.classList.remove("active");
     quizResult.classList.add("active");
@@ -599,6 +653,12 @@ function findClosestCoreDiscipline(dept) {
     }
     if (dLower.includes("hukuk") || dLower.includes("adalet") || dLower.includes("avukat") || dLower.includes("hak")) {
         return "Hukuk Kuramı ve Felsefesi";
+    }
+    if (dLower.includes("sanat") || dLower.includes("tasarim") || dLower.includes("dizayn") || dLower.includes("resim") || dLower.includes("gorsel") || dLower.includes("kreatif")) {
+        return "Sanat & Tasarım Kuramı (Estetik ve Görsel İletişim)";
+    }
+    if (dLower.includes("tarih") || dLower.includes("siyaset") || dLower.includes("politika") || dLower.includes("kamu")) {
+        return "Tarih ve Siyaset Bilimi";
     }
     // Default fallback
     return "Bilgisayar Bilimleri";
@@ -707,6 +767,9 @@ function updateTBuilderPreview() {
             tPreviewSkillsContainer.appendChild(span);
         });
     }
+
+    // Dynamic career synergy evaluation
+    updateSynergyAnalysis();
 }
 
 // --- TERCİH LİSTEM MATRİSİ ---
@@ -757,12 +820,13 @@ function renderChecklist() {
     
     if (checklistItems.length === 0) {
         checklistEmpty.style.display = "block";
+        updateChecklistAnalysis();
         return;
     }
     
     checklistEmpty.style.display = "none";
 
-    checklistItems.forEach(item => {
+    checklistItems.forEach((item, idx) => {
         const row = document.createElement("tr");
         
         // Calculate score
@@ -776,6 +840,12 @@ function renderChecklist() {
         else if (score >= 35) scoreClass = "medium";
 
         row.innerHTML = `
+            <td class="center">
+                <div style="display: flex; flex-direction: column; gap: 2px; align-items: center; justify-content: center;">
+                    <button class="move-up-btn" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.75rem; padding: 2px 6px;" title="Yukarı Taşı">▲</button>
+                    <button class="move-down-btn" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.75rem; padding: 2px 6px;" title="Aşağı Taşı">▼</button>
+                </div>
+            </td>
             <td><strong>${item.name}</strong></td>
             <td class="center"><input type="checkbox" class="checklist-check check-sustain" ${item.sustain ? "checked" : ""}></td>
             <td class="center"><input type="checkbox" class="checklist-check check-flex" ${item.flex ? "checked" : ""}></td>
@@ -785,6 +855,14 @@ function renderChecklist() {
         `;
 
         // Attach events
+        row.querySelector(".move-up-btn").addEventListener("click", () => {
+            moveChecklistItem(item.id, -1);
+        });
+
+        row.querySelector(".move-down-btn").addEventListener("click", () => {
+            moveChecklistItem(item.id, 1);
+        });
+
         row.querySelector(".check-sustain").addEventListener("change", (e) => {
             item.sustain = e.target.checked;
             saveAndRefreshRow(item);
@@ -808,6 +886,8 @@ function renderChecklist() {
 
         checklistItemsContainer.appendChild(row);
     });
+
+    updateChecklistAnalysis();
 }
 
 function saveAndRefreshRow(item) {
@@ -823,4 +903,566 @@ function showToast(msg) {
     setTimeout(() => {
         toast.classList.remove("show");
     }, 2500);
+}
+
+// ==========================================
+//   EXTENDED FEATURES & ANALYSIS SYSTEM
+// ==========================================
+
+// --- QUIZ HISTORY & COMPARISON ---
+function initQuizHistory() {
+    const saved = localStorage.getItem("meslek_disiplin_quiz_history");
+    if (saved) {
+        try {
+            quizHistory = JSON.parse(saved);
+        } catch(e) {
+            quizHistory = [];
+        }
+    }
+    renderQuizHistory();
+    
+    clearHistoryBtn.addEventListener("click", () => {
+        quizHistory = [];
+        localStorage.removeItem("meslek_disiplin_quiz_history");
+        renderQuizHistory();
+    });
+
+    compareSelectedBtn.addEventListener("click", compareSelectedDepartments);
+    
+    comparisonModalCloseBtn.addEventListener("click", () => {
+        comparisonModal.classList.remove("active");
+    });
+    
+    comparisonModal.addEventListener("click", (e) => {
+        if (e.target === comparisonModal) {
+            comparisonModal.classList.remove("active");
+        }
+    });
+}
+
+function saveQuizToHistory(deptName, aggregate, sustain, flex, ai) {
+    quizHistory = quizHistory.filter(h => h.name.toLowerCase() !== deptName.toLowerCase());
+    
+    quizHistory.unshift({
+        id: Date.now(),
+        name: deptName,
+        score: aggregate,
+        sustain: sustain,
+        flex: flex,
+        ai: ai,
+        date: new Date().toLocaleDateString("tr-TR")
+    });
+    
+    if (quizHistory.length > 10) {
+        quizHistory.pop();
+    }
+    
+    localStorage.setItem("meslek_disiplin_quiz_history", JSON.stringify(quizHistory));
+    renderQuizHistory();
+}
+
+function renderQuizHistory() {
+    historyGrid.innerHTML = "";
+    
+    if (quizHistory.length === 0) {
+        quizHistoryCard.style.display = "none";
+        historyCompareAction.style.display = "none";
+        return;
+    }
+    
+    quizHistoryCard.style.display = "block";
+    historyCompareAction.style.display = quizHistory.length >= 2 ? "block" : "none";
+    
+    quizHistory.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card history-item-card";
+        card.style.padding = "20px";
+        card.style.background = "rgba(255, 255, 255, 0.02)";
+        card.style.position = "relative";
+        card.style.display = "flex";
+        card.style.flexDirection = "column";
+        card.style.gap = "12px";
+        card.style.border = "1px solid var(--border-color)";
+        card.style.borderRadius = "var(--radius-md)";
+        card.style.cursor = "pointer";
+        
+        let scoreClass = "low";
+        if (item.score >= 80) scoreClass = "high";
+        else if (item.score >= 50) scoreClass = "medium";
+        
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                <label class="checkbox-label" style="font-weight: 700; color: #ffffff; cursor: pointer;">
+                    <input type="checkbox" class="compare-checkbox" value="${item.id}" style="width: 18px; height: 18px;">
+                    <span>${item.name}</span>
+                </label>
+                <button class="delete-history-btn" data-id="${item.id}" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem;">&times;</button>
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+                <span class="checklist-score ${scoreClass}" style="font-size: 1.4rem;">%${item.score}</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">${item.date}</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Sürdürülebilirlik:</span>
+                    <span style="color: #ffffff; font-weight: 600;">%${item.sustain}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Esneklik:</span>
+                    <span style="color: #ffffff; font-weight: 600;">%${item.flex}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>AI Bağışıklığı:</span>
+                    <span style="color: #ffffff; font-weight: 600;">%${item.ai}</span>
+                </div>
+            </div>
+        `;
+        
+        card.querySelector(".delete-history-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            const id = parseInt(e.target.getAttribute("data-id"));
+            quizHistory = quizHistory.filter(h => h.id !== id);
+            localStorage.setItem("meslek_disiplin_quiz_history", JSON.stringify(quizHistory));
+            renderQuizHistory();
+        });
+
+        card.addEventListener("click", (e) => {
+            if (e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") {
+                const cb = card.querySelector(".compare-checkbox");
+                cb.checked = !cb.checked;
+            }
+        });
+
+        historyGrid.appendChild(card);
+    });
+}
+
+function compareSelectedDepartments() {
+    const checkedCheckboxes = historyGrid.querySelectorAll(".compare-checkbox:checked");
+    if (checkedCheckboxes.length < 2) {
+        showToast("Karşılaştırmak için en az 2 bölüm seçmelisiniz!");
+        return;
+    }
+    
+    const selectedIds = Array.from(checkedCheckboxes).map(cb => parseInt(cb.value));
+    const itemsToCompare = quizHistory.filter(h => selectedIds.includes(h.id));
+    
+    comparisonModalBody.innerHTML = "";
+    
+    const container = document.createElement("div");
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+    container.style.gap = "28px";
+    
+    const compGrid = document.createElement("div");
+    compGrid.style.display = "grid";
+    compGrid.style.gridTemplateColumns = `repeat(${itemsToCompare.length}, 1fr)`;
+    compGrid.style.gap = "20px";
+    compGrid.style.overflowX = "auto";
+    
+    if (window.innerWidth < 768) {
+        compGrid.style.gridTemplateColumns = "1fr";
+    }
+
+    itemsToCompare.forEach(item => {
+        const col = document.createElement("div");
+        col.className = "card";
+        col.style.background = "rgba(255, 255, 255, 0.02)";
+        col.style.border = "1px solid var(--border-color)";
+        col.style.padding = "24px";
+        
+        let scoreClass = "low";
+        if (item.score >= 80) scoreClass = "high";
+        else if (item.score >= 50) scoreClass = "medium";
+
+        col.innerHTML = `
+            <h4 style="font-size: 1.25rem; font-weight: 800; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px; min-height: 50px;">${item.name}</h4>
+            
+            <div style="text-align: center; margin-bottom: 24px;">
+                <span class="checklist-score ${scoreClass}" style="font-size: 2.2rem; display: block;">%${item.score}</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Ortalama Güvenlik Skoru</span>
+            </div>
+            
+            <div class="result-breakdown" style="gap: 16px; display: flex; flex-direction: column;">
+                <div class="breakdown-item" style="display: flex; flex-direction: column; gap: 6px;">
+                    <div class="breakdown-label" style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                        <span>Sürdürülebilirlik</span>
+                        <span>%${item.sustain}</span>
+                    </div>
+                    <div class="progress-bar" style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 100px; overflow: hidden;">
+                        <div class="progress" style="width: ${item.sustain}%; height: 100%; background: var(--gradient-accent);"></div>
+                    </div>
+                </div>
+                <div class="breakdown-item" style="display: flex; flex-direction: column; gap: 6px;">
+                    <div class="breakdown-label" style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                        <span>Kariyer Esnekliği</span>
+                        <span>%${item.flex}</span>
+                    </div>
+                    <div class="progress-bar" style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 100px; overflow: hidden;">
+                        <div class="progress" style="width: ${item.flex}%; height: 100%; background: var(--gradient-accent);"></div>
+                    </div>
+                </div>
+                <div class="breakdown-item" style="display: flex; flex-direction: column; gap: 6px;">
+                    <div class="breakdown-label" style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                        <span>AI Bağışıklığı</span>
+                        <span>%${item.ai}</span>
+                    </div>
+                    <div class="progress-bar" style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 100px; overflow: hidden;">
+                        <div class="progress" style="width: ${item.ai}%; height: 100%; background: var(--gradient-accent);"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        compGrid.appendChild(col);
+    });
+    
+    container.appendChild(compGrid);
+    
+    const summary = document.createElement("div");
+    summary.className = "card";
+    summary.style.background = "rgba(139, 92, 246, 0.05)";
+    summary.style.border = "1px solid rgba(139, 92, 246, 0.2)";
+    summary.style.padding = "24px";
+    
+    const sorted = [...itemsToCompare].sort((a,b) => b.score - a.score);
+    summary.innerHTML = `
+        <h4 style="color: #a78bfa; margin-bottom: 10px; font-weight: 700; font-size: 1.1rem;">💡 Asistan Karşılaştırma Analizi</h4>
+        <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-muted); margin: 0;">
+            Seçtiğiniz ${itemsToCompare.length} alan arasında yapılan karşılaştırmaya göre, geleceğe en dayanıklı ve esnek seçenek <strong>%${sorted[0].score}</strong> skor ile <strong>${sorted[0].name}</strong> olarak öne çıkmaktadır. 
+            ${sorted[0].score >= 80 ? "Bu alan güçlü bir disiplin temelidir." : "Bu alanı seçseniz dahi yan becerilerle desteklemeniz kritiktir."} 
+            En düşük skora sahip olan <strong>${sorted[sorted.length - 1].name} (%${sorted[sorted.length - 1].score})</strong> ise daha dar bir mesleki odak barındırmaktadır.
+        </p>
+    `;
+    container.appendChild(summary);
+    
+    comparisonModalBody.appendChild(container);
+    comparisonModal.classList.add("active");
+}
+
+// --- T-BUILDER CAREER SYNERGY SYSTEM ---
+const synergyDb = {
+    "Matematik ve İstatistik": [
+        {
+            required: ["Python ile Veri Analizi", "SQL & Veritabanı"],
+            role: "Veri Bilimci (Data Scientist)",
+            desc: "Matematiksel altyapınızı veri analizi ve veritabanı sorgulama becerileriyle birleştirerek veri odaklı kararlar üreten kilit aktör olursunuz."
+        },
+        {
+            required: ["Finansal Okuryazarlık"],
+            role: "Kantitatif Finans Analisti (Quant)",
+            desc: "İstatistiksel modelleme yeteneğinizi piyasa okuryazarlığıyla birleştirerek risk modelleri ve algoritmik ticaret stratejileri geliştirirsiniz."
+        },
+        {
+            required: ["Prompt Tasarımı", "İleri Düzey İngilizce"],
+            role: "Yapay Zeka Hizalama ve Veri Stratejisti",
+            desc: "Matematiksel mantığı yapay zekaya yön verme becerisiyle birleştirip karmaşık modellerin doğruluğunu optimize edersiniz."
+        }
+    ],
+    "Ekonomi ve İktisat": [
+        {
+            required: ["Python ile Veri Analizi", "Finansal Okuryazarlık"],
+            role: "Ekonometrist & Finans Teknolojileri (Fintech) Uzmanı",
+            desc: "Ekonomi teorisini veri madenciliği ve finansal araçlarla birleştirerek fintech girişimlerinde yeni nesil finans modelleri kurgularsınız."
+        },
+        {
+            required: ["Dijital Pazarlama", "Proje Yönetimi (Agile)"],
+            role: "Büyüme Stratejisti (Growth Hacker / Product Manager)",
+            desc: "Teşvik mekanizmaları ve pazar dinamiklerini Agile süreçlerle yöneterek ürünlerin pazar uyumunu hızlandırırsınız."
+        }
+    ],
+    "Psikoloji": [
+        {
+            required: ["Kullanıcı Deneyimi (UX)", "Temel Tasarım İlkeleri"],
+            role: "Bilişsel UX Tasarımcısı & Ürün Deneyim Yöneticisi",
+            desc: "İnsan zihninin algı sınırlarını ve davranış kalıplarını arayüz tasarımlarına dönüştürerek kusursuz ürün deneyimleri yaratırsınız."
+        },
+        {
+            required: ["Prompt Tasarımı", "İleri Düzey İngilizce"],
+            role: "İnsan-AI Etkileşimi (HCI) Araştırmacısı",
+            desc: "İnsan psikolojisi bilgisini yapay zekanın dil işleme yeteneğiyle harmanlayıp sohbet botlarının insansı ve empati kurabilen etkileşimler yapmasını sağlarsınız."
+        }
+    ],
+    "Felsefe": [
+        {
+            required: ["Prompt Tasarımı", "İleri Düzey İngilizce"],
+            role: "Prompt Mimarı & Yapay Zeka Hizalama Mühendisi",
+            desc: "Mantıksal akıl yürütme ve dil analiz becerilerini AI modellerini yönlendirmekte kullanarak yapay zekadan en yüksek verimi alırsınız."
+        },
+        {
+            required: ["Temel Siber Güvenlik", "Proje Yönetimi (Agile)"],
+            role: "Teknoloji Etiği ve Uyumluluk Yöneticisi",
+            desc: "Etik ve mantık teorilerini dijital güvenlik politikalarıyla entegre ederek organizasyonun teknolojik risklerini yönetirsiniz."
+        }
+    ],
+    "Bilgisayar Bilimleri": [
+        {
+            required: ["Temel Siber Güvenlik", "SQL & Veritabanı"],
+            role: "Bulut Güvenliği ve Altyapı Mimarı",
+            desc: "Algoritmik sistemlerinizi veri tabanı ve ağ güvenliği bilgisiyle birleştirerek güvenli, ölçeklenebilir bulut sistemleri tasarlarsınız."
+        },
+        {
+            required: ["Kullanıcı Deneyimi (UX)", "Proje Yönetimi (Agile)"],
+            role: "Teknik Ürün Yöneticisi (Technical PM)",
+            desc: "Yazılım geliştirme mantığını kullanıcı odaklı yaklaşım ve Agile yönetimiyle birleştirerek geliştirici takımlarla iş birliği yaparsınız."
+        }
+    ],
+    "Sosyoloji ve Antropoloji": [
+        {
+            required: ["Python ile Veri Analizi", "Topluluk Yönetimi"],
+            role: "Hesaplamalı Sosyal Bilimci & Ağ Analisti",
+            desc: "Toplumsal davranış kalıplarını veri bilimiyle inceleyerek dijital platformlardaki insan etkileşim ağlarını analiz edersiniz."
+        },
+        {
+            required: ["Topluluk Yönetimi", "Dijital Pazarlama"],
+            role: "Kripto/DAO Topluluk Yöneticisi & Sosyal Tasarımcı",
+            desc: "Kültür ve topluluk örgütlenme kurallarını kullanarak merkeziyetsiz toplulukları (DAO) kurgular ve yönetirsiniz."
+        }
+    ],
+    "Dilbilim": [
+        {
+            required: ["Prompt Tasarımı", "Python ile Veri Analizi"],
+            role: "NLP (Doğal Dil İşleme) Semantik Analisti",
+            desc: "Dilin matematiksel ve anlamsal kurallarını kodlama ve AI modelleriyle birleştirip NLP projelerinde yer alırsınız."
+        }
+    ],
+    "Sanat & Tasarım Kuramı (Estetik ve Görsel İletişim)": [
+        {
+            required: ["Kullanıcı Deneyimi (UX)", "Temel Tasarım İlkeleri"],
+            role: "Kreatif Ürün Tasarımcısı (Product Designer)",
+            desc: "Estetik ilkeleri modern arayüz tasarımı ve kullanıcı davranışı analiziyle harmanlayarak dijital ürünler tasarlarsınız."
+        },
+        {
+            required: ["Video Kurgu & Montaj", "Dijital Pazarlama"],
+            role: "Multimedya İçerik Mimarı & Kreatif Yönetmen",
+            desc: "Görsel hikayeciliği modern pazarlama dinamikleri ve video kurgu becerileriyle birleştirerek viral kampanyalar yönetirsiniz."
+        }
+    ],
+    "Tarih ve Siyaset Bilimi": [
+        {
+            required: ["Finansal Okuryazarlık", "İleri Düzey İngilizce"],
+            role: "Küresel Risk ve Jeopolitik Analist",
+            desc: "Tarihsel ve siyasi dinamikleri küresel finans okuryazarlığıyla birleştirerek şirketlerin global pazarlardaki adımlarını planlarsınız."
+        }
+    ]
+};
+
+const generalSynergies = {
+    "Matematik ve İstatistik": {
+        role: "Veri Odaklı Model Analisti",
+        desc: "Seçtiğiniz yatay becerileri veri ve analiz gücünüzle birleştirerek karar süreçlerini optimize eden analitik roller üstlenebilirsiniz."
+    },
+    "Ekonomi ve İktisat": {
+        role: "Stratejik Kaynak Planlayıcısı",
+        desc: "Sistem ve pazar bilginizi yatay becerilerinizle birleştirip operasyonel verimlilik ve büyüme rollerinde çalışabilirsiniz."
+    },
+    "Psikoloji": {
+        role: "Davranışsal İletişim Uzmanı",
+        desc: "İnsan davranışlarını anlama yeteneğinizi seçtiğiniz pratik becerilerle harmanlayıp kullanıcı veya çalışan odaklı rollerde fark yaratırsınız."
+    },
+    "Felsefe": {
+        role: "Kavramsal Sistem Tasarımcısı",
+        desc: "Mantık kurma ve kavram analiz yeteneklerinizi seçtiğiniz teknik becerilerle birleştirip üst düzey yönetim ve koordinasyon rolleri üstlenebilirsiniz."
+    },
+    "Temel Bilimler (Fizik/Biyoloji)": {
+        role: "Ar-Ge ve Simülasyon Analisti",
+        desc: "Zorlu problem çözme yeteneğinizi yatay becerilerinizle birleştirip yenilikçi laboratuvar ve teknoloji projelerinde yer alabilirsiniz."
+    },
+    "Bilgisayar Bilimleri": {
+        role: "Dijital Çözüm Mimarı",
+        desc: "Yazılım and sistem mantığınızı seçtiğiniz yatay becerilerle zenginleştirip teknoloji odaklı karmaşık projeleri yönetirsiniz."
+    },
+    "Sosyoloji ve Antropoloji": {
+        role: "Kültür ve Organizasyon Stratejisti",
+        desc: "Grup dinamiklerini anlama yetinizi yatay becerilerinizle birleştirip topluluk ve organizasyon yapılandırmasında rol alırsınız."
+    },
+    "Dilbilim": {
+        role: "İletişim ve Anlam Yapılandırıcısı",
+        desc: "Semantik ve kurallı düşünme yeteneğinizi seçtiğiniz yatay becerilerle birleştirip yapay zeka veya dijital içerik alanlarında yer bulursunuz."
+    },
+    "Hukuk Kuramı ve Felsefesi": {
+        role: "Sistem ve Kural Denetçisi",
+        desc: "Kural koyucu ve sistem kurucu bakış açınızı yatay becerilerinizle birleştirerek dijital çağın regülasyon ve uyumluluk süreçlerini yönetirsiniz."
+    },
+    "Sanat & Tasarım Kuramı (Estetik ve Görsel İletişim)": {
+        role: "Yaratıcı Arayüz Stratejisti",
+        desc: "Estetik algınızı ve görsel iletişim yeteneğinizi yatay becerilerinizle birleştirip kullanıcıların dikkatini çeken deneyimler üretirsiniz."
+    },
+    "Tarih ve Siyaset Bilimi": {
+        role: "Makro Strateji Uzmanı",
+        desc: "Sistem ve iktidar analiz gücünüzü seçtiğiniz yatay becerilerle birleştirerek uzun vadeli stratejiler kurgularsınız."
+    }
+};
+
+function updateSynergyAnalysis() {
+    tSynergyContent.innerHTML = "";
+    
+    const specificRules = synergyDb[selectedBuilderCore] || [];
+    const matchedRoles = [];
+    
+    specificRules.forEach(rule => {
+        const hasAllSkills = rule.required.every(skill => selectedBuilderSkills.includes(skill));
+        if (hasAllSkills) {
+            matchedRoles.push(rule);
+        }
+    });
+    
+    if (matchedRoles.length > 0) {
+        matchedRoles.forEach(role => {
+            const card = document.createElement("div");
+            card.style.background = "rgba(16, 185, 129, 0.05)";
+            card.style.border = "1px solid rgba(16, 185, 129, 0.2)";
+            card.style.borderRadius = "var(--radius-sm)";
+            card.style.padding = "16px";
+            card.style.marginBottom = "12px";
+            card.style.animation = "scaleIn 0.3s ease";
+            
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-weight: 700; color: var(--secondary); font-size: 0.95rem;">${role.role}</span>
+                    <span class="result-badge" style="background: rgba(16,185,129,0.1); color: var(--secondary); border: 1px solid rgba(16,185,129,0.2); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight:700;">Sinerji Eşleşmesi</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">${role.desc}</p>
+                <div style="margin-top: 8px; font-size: 0.75rem; color: var(--text-muted);">Gerekenler: <span style="color: #ffffff;">${role.required.join(" + ")}</span></div>
+            `;
+            tSynergyContent.appendChild(card);
+        });
+    } else {
+        const fallback = generalSynergies[selectedBuilderCore] || {
+            role: "Çok Yönlü Uzman",
+            desc: "Seçtiğiniz yatay becerileri bu temel disiplinle harmanlayarak, kendinizi esnek ve yeni çağın gereklerine hazır hale getirebilirsiniz."
+        };
+        
+        const card = document.createElement("div");
+        card.style.background = "rgba(255, 255, 255, 0.02)";
+        card.style.border = "1px solid var(--border-color)";
+        card.style.borderRadius = "var(--radius-sm)";
+        card.style.padding = "16px";
+        card.style.animation = "scaleIn 0.3s ease";
+        
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 700; color: #ffffff; font-size: 0.95rem;">${fallback.role}</span>
+                <span class="result-badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border-color); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight:700;">Genel Sinerji</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">${fallback.desc}</p>
+            <p style="font-size: 0.75rem; color: #a78bfa; margin-top: 8px; font-weight: 500; margin: 8px 0 0 0;">💡 İpucu: Listeden başka yatay beceriler ekleyerek özel sinerji eşleşmelerini tetikleyin!</p>
+        `;
+        tSynergyContent.appendChild(card);
+    }
+}
+
+// --- CHECKLIST REORDERING & SMART ASSISTANT ---
+function moveChecklistItem(id, direction) {
+    const idx = checklistItems.findIndex(item => item.id === id);
+    if (idx === -1) return;
+    
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= checklistItems.length) return;
+    
+    const temp = checklistItems[idx];
+    checklistItems[idx] = checklistItems[newIdx];
+    checklistItems[newIdx] = temp;
+    
+    saveChecklist();
+    renderChecklist();
+}
+
+function updateChecklistAnalysis() {
+    if (checklistItems.length === 0) {
+        checklistAnalysisPanel.style.display = "none";
+        return;
+    }
+    
+    checklistAnalysisPanel.style.display = "block";
+    
+    let totalScore = 0;
+    let sustainCount = 0;
+    let flexCount = 0;
+    
+    checklistItems.forEach(item => {
+        let itemScore = 0;
+        if (item.sustain) {
+            itemScore += 35;
+            sustainCount++;
+        }
+        if (item.flex) {
+            itemScore += 35;
+            flexCount++;
+        }
+        if (item.passion) {
+            itemScore += 30;
+        }
+        totalScore += itemScore;
+    });
+    
+    const avgScore = Math.round(totalScore / checklistItems.length);
+    const sustainPercent = Math.round((sustainCount / checklistItems.length) * 100);
+    const flexPercent = Math.round((flexCount / checklistItems.length) * 100);
+    
+    statAvgScore.textContent = `%${avgScore}`;
+    statAvgSustain.textContent = `%${sustainPercent}`;
+    statAvgFlex.textContent = `%${flexPercent}`;
+    
+    setStatColor(statAvgScore, avgScore);
+    setStatColor(statAvgSustain, sustainPercent);
+    setStatColor(statAvgFlex, flexPercent);
+    
+    let feedback = "";
+    if (avgScore >= 75) {
+        feedback = "Mükemmel dengeli bir tercih listesi! Listenizdeki bölümler genel olarak yapay zeka karşısında dayanıklı, esnek ve başka sektörlere taşınabilir nitelikte temel disiplinlerden oluşuyor. Kariyerinizi kurgularken sağlam bir zemindesiniz.";
+    } else if (avgScore >= 45) {
+        feedback = "Listeniz dengeli bir dağılıma sahip. Hem esnek disiplinler hem de bazı dar kapsamlı alanlar barındırıyor. Dar alanları seçerken onların mesleki rutinlerini yapay zeka araçlarıyla nasıl zenginleştirebileceğinizi mutlaka araştırın.";
+    } else {
+        feedback = "⚠️ Listenizdeki bölümler ağırlıklı olarak yapay zekanın otomatize etmeye en meyilli olduğu, rutin odaklı veya düşük esneklikteki 'dar meslekleri' barındırıyor. Bu bölümleri seçecekseniz bile, T-Builder sayfamıza giderek kendinizi Python, İngilizce, Agile gibi yatay becerilerle mutlaka desteklemeli ve donatmalısınız.";
+    }
+    
+    analysisFeedbackText.innerHTML = feedback;
+    
+    analysisRecommendedSkills.innerHTML = "";
+    
+    const suggested = new Set();
+    checklistItems.forEach(item => {
+        const nameLower = item.name.toLowerCase();
+        if (nameLower.includes("matematik") || nameLower.includes("istatistik") || nameLower.includes("yazilim") || nameLower.includes("bilgisayar") || nameLower.includes("kod")) {
+            suggested.add("Python ile Veri Analizi");
+            suggested.add("SQL & Veritabanı");
+            suggested.add("Proje Yönetimi (Agile)");
+        } else if (nameLower.includes("tasarim") || nameLower.includes("sanat") || nameLower.includes("mimarlik") || nameLower.includes("grafik")) {
+            suggested.add("Kullanıcı Deneyimi (UX)");
+            suggested.add("Temel Tasarım İlkeleri");
+            suggested.add("Video Kurgu & Montaj");
+        } else {
+            suggested.add("İleri Düzey İngilizce");
+            suggested.add("Prompt Tasarımı");
+            suggested.add("Sunum ve İkna Becerileri");
+        }
+    });
+    
+    if (suggested.size === 0) {
+        suggested.add("İleri Düzey İngilizce");
+        suggested.add("Prompt Tasarımı");
+    }
+    
+    Array.from(suggested).slice(0, 4).forEach(skill => {
+        const span = document.createElement("span");
+        span.className = "skill-tag";
+        span.style.background = "rgba(139, 92, 246, 0.1)";
+        span.style.color = "#a78bfa";
+        span.style.border = "1px solid rgba(139, 92, 246, 0.2)";
+        span.textContent = skill;
+        analysisRecommendedSkills.appendChild(span);
+    });
+}
+
+function setStatColor(element, score) {
+    element.className = "stat-num";
+    if (score >= 75) {
+        element.style.color = "var(--secondary)";
+    } else if (score >= 45) {
+        element.style.color = "#f59e0b";
+    } else {
+        element.style.color = "#ef4444";
+    }
 }
